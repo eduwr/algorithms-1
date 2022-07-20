@@ -6,6 +6,12 @@ abstract class AbstractUF {
 }
 
 export default class UF implements AbstractUF {
+  public readonly N: number;
+
+  constructor(N: number) {
+    this.N = N;
+  }
+
   find(p: number) {
     return p;
   }
@@ -15,7 +21,7 @@ export default class UF implements AbstractUF {
   }
 
   connected(p: number, q: number) {
-    return true;
+    return false;
   }
 
   union(p: number, q: number) {}
