@@ -15,8 +15,18 @@ export default class UF implements AbstractUF {
     this.components = Array.from({ length: this.N }, (_, k) => k);
   }
 
+  /**
+   * @param {number} p - Receives a number within the components array
+   * @return {number} Returns the componentId in which `p` is connected
+   */
   find(p: number) {
-    return p;
+    if (p < 0 || p > this.components.length - 1) {
+      throw new Error(
+        `input must be within 0 and ${this.components.length - 1}`
+      );
+    }
+
+    return this.components[p];
   }
 
   count() {
