@@ -20,22 +20,37 @@ export default class UF implements AbstractUF {
    * @return {number} Returns the componentId in which `p` is connected
    */
   find(p: number) {
-    if (p < 0 || p > this.components.length - 1) {
-      throw new Error(
-        `input must be within 0 and ${this.components.length - 1}`
-      );
+    if (!this.withinRange(p)) {
+      throw new Error(`input must be within 0 and ${this.N - 1}`);
     }
 
     return this.components[p];
   }
 
+  /**
+   * @param {number} p - Number to be compared with q
+   * @param {number} q - Number to be compared with p
+   * @return {boolean} Returns true if the input values are connected
+   */
+  connected(p: number, q: number) {
+    if (!this.withinRange(p, q)) {
+      throw new Error(
+        `inputs [${p} and ${q}] must be within 0 and ${this.N - 1}`
+      );
+    }
+
+    return this.components[p] === this.components[q];
+  }
+
+  union(p: number, q: number) {}
+
   count() {
     return 0;
   }
 
-  connected(p: number, q: number) {
-    return false;
+  private withinRange(...numbers: number[]) {
+    return numbers
+      .map((n) => n >= 0 && n <= this.N - 1)
+      .every((n) => n === true);
   }
-
-  union(p: number, q: number) {}
 }
