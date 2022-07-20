@@ -1,4 +1,5 @@
 abstract class AbstractUF {
+  abstract components: number[];
   abstract union: (p: number, q: number) => void;
   abstract connected: (p: number, q: number) => boolean;
   abstract find: (p: number) => number;
@@ -7,9 +8,11 @@ abstract class AbstractUF {
 
 export default class UF implements AbstractUF {
   public readonly N: number;
+  public components: number[];
 
   constructor(N: number) {
     this.N = N;
+    this.components = Array.from({ length: this.N }, (_, k) => k);
   }
 
   find(p: number) {
