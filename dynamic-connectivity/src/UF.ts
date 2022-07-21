@@ -42,7 +42,14 @@ export default class UF implements AbstractUF {
     return this.components[p] === this.components[q];
   }
 
-  union(p: number, q: number) {}
+  union(p: number, q: number) {
+    const pId = this.components[p];
+    const qId = this.components[q];
+
+    for (let i = 0; i <= this.N; i++) {
+      if (this.components[i] === pId) this.components[i] = qId;
+    }
+  }
 
   count() {
     return 0;
