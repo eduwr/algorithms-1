@@ -1,3 +1,7 @@
+type ComponentsMap = {
+  [key: number]: number[];
+};
+
 abstract class AbstractUF {
   abstract components: number[];
   abstract union: (p: number, q: number) => void;
@@ -13,6 +17,16 @@ export default class UF implements AbstractUF {
   constructor(N: number) {
     this.N = N;
     this.components = Array.from({ length: this.N }, (_, k) => k);
+  }
+
+  get componentsMap() {
+    return this.components.reduce(
+      (acc, curr, idx) => ({
+        ...acc,
+        [curr]: [...(Array.isArray(acc[curr]) ? acc[curr] : []), idx],
+      }),
+      {} as ComponentsMap
+    );
   }
 
   /**
