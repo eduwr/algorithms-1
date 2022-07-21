@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/main.ts"
+    "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/main.ts",
+    "percolation": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/Percolation.ts"
   },
   "devDependencies": {
     "ts-node-dev": "^2.0.0",
