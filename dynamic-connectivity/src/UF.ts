@@ -6,7 +6,7 @@ abstract class AbstractUF {
   abstract components: number[];
   abstract union: (p: number, q: number) => void;
   abstract connected: (p: number, q: number) => boolean;
-  abstract find: (p: number) => number;
+  abstract root: (p: number) => number;
   abstract count: () => number;
 }
 
@@ -20,25 +20,32 @@ export default class UF implements AbstractUF {
   }
 
   get componentsMap() {
-    return this.components.reduce(
-      (acc, curr, idx) => ({
+    return this.components.reduce((acc, curr, idx) => {
+      const root = this.root(curr);
+
+      return {
         ...acc,
-        [curr]: [...(Array.isArray(acc[curr]) ? acc[curr] : []), idx],
-      }),
-      {} as ComponentsMap
-    );
+        [root]: [...(Array.isArray(acc[root]) ? acc[root] : []), idx],
+      };
+    }, {} as ComponentsMap);
   }
 
   /**
    * @param {number} p - Receives a number within the components array
-   * @return {number} Returns the componentId in which `p` is connected
+   * @return {number} Returns the root of `p`
    */
-  find(p: number) {
+  root(p: number) {
     if (!this.withinRange(p)) {
       throw new Error(`input must be within 0 and ${this.N - 1}`);
     }
 
-    return this.components[p];
+    let root = this.components[p];
+
+    while (this.components[root] !== root) {
+      root = this.components[root];
+    }
+
+    return root;
   }
 
   /**
@@ -53,16 +60,14 @@ export default class UF implements AbstractUF {
       );
     }
 
-    return this.components[p] === this.components[q];
+    return this.root(p) === this.root(q);
   }
 
   union(p: number, q: number) {
-    const pId = this.components[p];
-    const qId = this.components[q];
+    const pRoot = this.root(p);
+    const qRoot = this.root(q);
 
-    for (let i = 0; i <= this.N; i++) {
-      if (this.components[i] === pId) this.components[i] = qId;
-    }
+    this.components[pRoot] = qRoot;
   }
 
   count() {
