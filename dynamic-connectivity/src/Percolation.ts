@@ -1,3 +1,4 @@
+import { IllegalArgumentException } from "./Exceptions";
 import UF from "./UF";
 
 abstract class AbstractPercolation {
@@ -34,7 +35,19 @@ export class Percolation implements AbstractPercolation {
     }
   }
 
-  public open(row: number, col: number): void {}
+  private withinRange(...numbers: number[]) {
+    return numbers
+      .map((n) => n > 0 && n <= this.uf.N - 2)
+      .every((n) => n === true);
+  }
+
+  public open(row: number, col: number): void {
+    if (!this.withinRange(row, col)) {
+      throw new IllegalArgumentException(
+        `inputs [${row} and ${col}] must be within 1 and ${this.uf.N - 2}`
+      );
+    }
+  }
 
   public isOpen(row: number, col: number): boolean {
     return true;
@@ -49,7 +62,7 @@ export class Percolation implements AbstractPercolation {
   }
 
   public percolates(): boolean {
-    return true;
+    return this.uf.connected(0, this.uf.N - 1);
   }
 
   public static main(...args: String[]): void {
@@ -65,7 +78,9 @@ export class Percolation implements AbstractPercolation {
     console.log(percolation.uf.connected(17, 15));
     console.log(percolation.uf.connected(17, 14));
     console.log(percolation.uf.connected(17, 13));
-    console.log(percolation.uf.connected(17, 12));
+    console.log(percolation.uf.N);
+    console.log("Percolates?", percolation.percolates());
+    console.log(percolation.uf.components.length);
   }
 }
 
