@@ -91,7 +91,13 @@ export class Percolation implements AbstractPercolation {
       );
     }
 
-    return true;
+    const index = this.getIndex(row, col);
+
+    if (!index) {
+      return false;
+    }
+
+    return this.uf.connected(0, index);
   }
 
   public numberOfOpenSites(): number {
