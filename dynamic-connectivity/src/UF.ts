@@ -47,6 +47,8 @@ export default class UF implements AbstractUF {
     let root = this.components[p];
 
     while (this.components[root] !== root) {
+      // Root compression
+      this.components[root] = this.components[this.components[root]];
       root = this.components[root];
     }
 
