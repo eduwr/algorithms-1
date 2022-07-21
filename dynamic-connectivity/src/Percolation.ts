@@ -77,7 +77,9 @@ export class Percolation implements AbstractPercolation {
       );
     }
 
-    return true;
+    const [center, ...neighbors] = this.getNeighbors(row, col);
+
+    return neighbors.every((neighbor) => this.uf.connected(center, neighbor));
   }
 
   public isFull(row: number, col: number): boolean {
@@ -138,8 +140,16 @@ export class Percolation implements AbstractPercolation {
     console.log("Percolates?", percolation.percolates());
     console.log(percolation.uf.components.length);
 
-    percolation.open(2, 2);
+    // Test open and isOpen methods
 
+    console.log("Is 2, 2 open? ", percolation.isOpen(2, 2));
+    console.log("Calling open...");
+    percolation.open(2, 2);
+    console.log("Is 2, 2 open? ", percolation.isOpen(2, 2));
+    console.log("Is 3, 4 open? ", percolation.isOpen(3, 4));
+    console.log("Calling open...");
+    percolation.open(3, 4);
+    console.log("Is 3, 4 open? ", percolation.isOpen(3, 4));
     console.log(percolation.uf.connected(0, 5));
 
     console.log(percolation.uf.components);
