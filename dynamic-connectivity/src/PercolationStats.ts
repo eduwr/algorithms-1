@@ -1,3 +1,6 @@
+import { IllegalArgumentException } from "./Exceptions";
+import { isBiggerThanZero } from "./utils";
+
 abstract class AbstractPercolationStats {
   // Constructor
   // perform independent trials on an n-by-n grid
@@ -20,7 +23,13 @@ abstract class AbstractPercolationStats {
 }
 
 export class PercolationStats implements AbstractPercolationStats {
-  constructor(n: number, trials: number) {}
+  constructor(n: number, trials: number) {
+    if (!isBiggerThanZero(n, trials)) {
+      throw new IllegalArgumentException(
+        "n and trials must be bigger than zero"
+      );
+    }
+  }
 
   public mean(): number {
     return 0;
@@ -38,5 +47,17 @@ export class PercolationStats implements AbstractPercolationStats {
     return 0;
   }
 
-  public static main(...args: String[]): void {}
+  public static main(): void {
+    const args = process.argv.slice(2, 4);
+
+    if (!isBiggerThanZero(...args)) {
+      throw new IllegalArgumentException(
+        "n and T must be positive integer numbers"
+      );
+    }
+    const [n, T] = args.map((arg) => Number(arg));
+
+    const stats = new PercolationStats(n, T);
+    console.log(stats);
+  }
 }
