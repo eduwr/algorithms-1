@@ -1,3 +1,5 @@
+// https://coursera.cs.princeton.edu/algs4/assignments/percolation/specification.php
+
 import { IllegalArgumentException } from "./Exceptions";
 import UF from "./UF";
 
