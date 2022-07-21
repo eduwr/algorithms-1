@@ -17,6 +17,7 @@ function main() {
     }
   });
 
+  console.log(uf.components);
   console.log(uf.componentsMap);
 
   const testConnections = [

@@ -2,6 +2,10 @@ type ComponentsMap = {
   [key: number]: number[];
 };
 
+type SizesMap = {
+  [key: number]: number;
+};
+
 abstract class AbstractUF {
   abstract components: number[];
   abstract union: (p: number, q: number) => void;
@@ -13,6 +17,7 @@ abstract class AbstractUF {
 export default class UF implements AbstractUF {
   public readonly N: number;
   public components: number[];
+  public sizes: SizesMap = {};
 
   constructor(N: number) {
     this.N = N;
@@ -67,7 +72,26 @@ export default class UF implements AbstractUF {
     const pRoot = this.root(p);
     const qRoot = this.root(q);
 
-    this.components[pRoot] = qRoot;
+    if (pRoot === qRoot) return;
+
+    if (!this.sizes[pRoot]) {
+      this.sizes[pRoot] = 1;
+    }
+
+    if (!this.sizes[qRoot]) {
+      this.sizes[qRoot] = 1;
+    }
+
+    if (this.sizes[pRoot] < this.sizes[qRoot]) {
+      this.components[pRoot] = qRoot;
+      this.sizes[qRoot] += this.sizes[pRoot];
+      delete this.sizes[pRoot];
+      return;
+    }
+
+    this.components[qRoot] = pRoot;
+    this.sizes[pRoot] += this.sizes[qRoot];
+    delete this.sizes[qRoot];
   }
 
   count() {
