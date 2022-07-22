@@ -97,7 +97,7 @@ export default class UF implements AbstractUF {
   }
 
   count() {
-    return 0;
+    return Object.keys(this.componentsMap).length;
   }
 
   private withinRange(...numbers: number[]) {

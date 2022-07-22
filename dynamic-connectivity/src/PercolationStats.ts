@@ -1,4 +1,5 @@
 import { IllegalArgumentException } from "./Exceptions";
+import { Percolation } from "./Percolation";
 import { isBiggerThanZero } from "./utils";
 
 abstract class AbstractPercolationStats {
@@ -23,16 +24,57 @@ abstract class AbstractPercolationStats {
 }
 
 export class PercolationStats implements AbstractPercolationStats {
+  private percolation: Percolation;
+  private n;
+  private trials;
+  private totalSites;
+  public openSites = 0;
+
   constructor(n: number, trials: number) {
     if (!isBiggerThanZero(n, trials)) {
       throw new IllegalArgumentException(
         "n and trials must be bigger than zero"
       );
     }
+
+    this.percolation = new Percolation(n);
+    this.n = n;
+    this.totalSites = n ** 2;
+    this.trials = trials;
+  }
+
+  private getRandomPoint(max = this.n, min = 1) {
+    const randompoint = Math.floor(Math.random() * (max - min) + min);
+
+    return randompoint;
+  }
+
+  private iterateUntilPercolate() {
+    console.log(this.n);
+    console.log(this.percolation.uf.N);
+
+    let percolates = false;
+
+    while (!percolates || this.totalSites !== this.openSites) {
+      const row = this.getRandomPoint();
+      const col = this.getRandomPoint();
+      console.log("while", this.totalSites, row, col, this.openSites);
+
+      if (!this.percolation.isOpen(row, col)) {
+        this.percolation.open(row, col);
+        this.openSites++;
+
+        if (this.percolation.percolates()) {
+          percolates = true;
+        }
+      }
+    }
   }
 
   public mean(): number {
-    return 0;
+    this.iterateUntilPercolate();
+
+    return this.openSites / this.totalSites;
   }
 
   public stddev(): number {
@@ -58,6 +100,8 @@ export class PercolationStats implements AbstractPercolationStats {
     const [n, T] = args.map((arg) => Number(arg));
 
     const stats = new PercolationStats(n, T);
-    console.log(stats);
+
+    const total = stats.mean();
+    console.log("TOTAL: ", total);
   }
 }

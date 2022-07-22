@@ -28,6 +28,7 @@ abstract class AbstractPercolation {
 export class Percolation implements AbstractPercolation {
   uf: UF;
   n: number;
+  private openSites = 0;
 
   constructor(n: number) {
     this.n = n;
@@ -69,7 +70,10 @@ export class Percolation implements AbstractPercolation {
 
     const [center, ...neighbors] = this.getNeighbors(row, col);
 
+    console.log("open", center);
+
     neighbors.forEach((neighbor) => this.uf.union(center, neighbor));
+    this.openSites++;
   }
 
   public isOpen(row: number, col: number): boolean {
@@ -80,8 +84,12 @@ export class Percolation implements AbstractPercolation {
     }
 
     const [center, ...neighbors] = this.getNeighbors(row, col);
+    console.log(center);
+    const isOpenned = neighbors.every((neighbor) =>
+      this.uf.connected(center, neighbor)
+    );
 
-    return neighbors.every((neighbor) => this.uf.connected(center, neighbor));
+    return isOpenned;
   }
 
   public isFull(row: number, col: number): boolean {
@@ -101,7 +109,7 @@ export class Percolation implements AbstractPercolation {
   }
 
   public numberOfOpenSites(): number {
-    return 0;
+    return this.openSites;
   }
 
   public percolates(): boolean {
@@ -110,8 +118,6 @@ export class Percolation implements AbstractPercolation {
 
   public static main(...args: String[]): void {
     const percolation = new Percolation(4);
-
-    console.log(percolation.uf.components);
 
     const hasTopConnected = Array.from(
       { length: percolation.n },
@@ -163,5 +169,3 @@ export class Percolation implements AbstractPercolation {
     console.log(percolation.uf.components);
   }
 }
-
-Percolation.main();
