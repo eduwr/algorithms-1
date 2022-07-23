@@ -25,10 +25,12 @@ abstract class AbstractPercolationStats {
 
 export class PercolationStats implements AbstractPercolationStats {
   private percolation: Percolation;
-  private n;
-  private trials;
-  private totalSites;
-  public openSites = 0;
+  private readonly n;
+  private readonly trials;
+  private readonly totalSites;
+  private percolationThresholds: number[] = []
+  private _mean = 0;
+  private _stddev = 0;
 
   constructor(n: number, trials: number) {
     if (!isBiggerThanZero(n, trials)) {
@@ -41,52 +43,72 @@ export class PercolationStats implements AbstractPercolationStats {
     this.n = n;
     this.totalSites = n ** 2;
     this.trials = trials;
+
+    this.repeatUntilReachNbrOfTrials();
+  }
+
+  private resetPercolation() {
+    this.percolation = new Percolation(this.n);
   }
 
   private getRandomPoint(max = this.n, min = 1) {
-    const randompoint = Math.floor(Math.random() * (max - min) + min);
-
-    return randompoint;
+    return Math.floor(Math.random() * (max - min) + min);
   }
 
-  private iterateUntilPercolate() {
-    console.log(this.n);
-    console.log(this.percolation.uf.N);
-
-    let percolates = false;
-
-    while (!percolates || this.totalSites !== this.openSites) {
+  private findPercolationThreshold() {
+    this.resetPercolation()
+    while (!this.percolation.percolates()) {
       const row = this.getRandomPoint();
       const col = this.getRandomPoint();
-      console.log("while", this.totalSites, row, col, this.openSites);
 
-      if (!this.percolation.isOpen(row, col)) {
-        this.percolation.open(row, col);
-        this.openSites++;
 
-        if (this.percolation.percolates()) {
-          percolates = true;
-        }
-      }
+      this.percolation.open(row, col)
+    }
+
+    return this.percolation.openSites / this.totalSites;
+  }
+
+  private repeatUntilReachNbrOfTrials() {
+    let currentTrials = 0
+
+    while (currentTrials !== this.trials) {
+      console.log(`Trial ${currentTrials}/${this.trials}`)
+      const percolationThreshold = this.findPercolationThreshold()
+      this.percolationThresholds.push(percolationThreshold)
+      currentTrials++
     }
   }
 
   public mean(): number {
-    this.iterateUntilPercolate();
+    if(this._mean) {
+      return this._mean
+    }
 
-    return this.openSites / this.totalSites;
+    this._mean = this.percolationThresholds.reduce((acc, curr) => {
+      return acc + (curr/this.trials)
+    }, 0);
+
+    return this._mean
   }
 
   public stddev(): number {
-    return 0;
+    if(this._stddev){
+      return this._stddev
+    }
+    const mean = this.mean()
+    this._stddev = this.percolationThresholds.reduce((acc, curr) => {
+      return acc + ((curr - mean) ** 2) / (this.trials - 1)
+    }, 0)
+
+    return this._stddev
   }
 
   public confidenceLo(): number {
-    return 0;
+    return this.mean() - (1.96*(Math.sqrt(this.stddev())) / Math.sqrt(this.trials))
   }
 
   public confidenceHi(): number {
-    return 0;
+    return this.mean() + (1.96*(Math.sqrt(this.stddev())) / Math.sqrt(this.trials))
   }
 
   public static main(): void {
@@ -101,7 +123,16 @@ export class PercolationStats implements AbstractPercolationStats {
 
     const stats = new PercolationStats(n, T);
 
-    const total = stats.mean();
-    console.log("TOTAL: ", total);
+    const mean = stats.mean();
+    const stddev = stats.stddev();
+    const confidenceLow = stats.confidenceLo();
+    const confidenceHi = stats.confidenceHi();
+    const results = {
+      mean,
+      stddev,
+      confidenceLow,
+      confidenceHi
+    }
+    console.table(results);
   }
 }
