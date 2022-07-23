@@ -2,6 +2,7 @@
 
 import { IllegalArgumentException } from "./Exceptions";
 import UF from "./UF";
+import { isBiggerThanZero } from "./utils";
 
 
 abstract class AbstractPercolation {
@@ -56,7 +57,6 @@ export class Percolation implements AbstractPercolation {
     const right = this.getIndex(row, col + 1);
     const bottom = this.getIndex(row + 1, col);
     const left = this.getIndex(row, col - 1);
-
     return [middle, top, right, bottom, left].filter(Boolean) as number[];
   }
 
@@ -114,8 +114,16 @@ export class Percolation implements AbstractPercolation {
     return this.uf.connected(0, this.uf.N - 1);
   }
 
-  public static main(...args: String[]): void {
-    const percolation = new Percolation(4);
+  public static main(): void {
+    const [size] = process.argv.slice(2, 3);
+
+    if (!isBiggerThanZero(size)) {
+      throw new IllegalArgumentException(
+        "Size must be positive integer number"
+      );
+    }
+
+    const percolation = new Percolation(Number(size));
 
     const hasTopConnected = Array.from(
       { length: percolation.n },
@@ -147,23 +155,43 @@ export class Percolation implements AbstractPercolation {
       areSecondAndBeforeLastRowDisconnected
     );
 
-    console.log(percolation.uf.connected(0, 5));
-    console.log(percolation.uf.N);
     console.log("Percolates?", percolation.percolates());
-    console.log(percolation.uf.components.length);
+    console.log("Array length: ", percolation.uf.components.length);
 
     // Test open and isOpen methods
 
     console.log("Is 2, 2 open? ", percolation.isOpen(2, 2));
     console.log("Calling open...");
-    percolation.open(2, 2);
-    console.log("Is 2, 2 open? ", percolation.isOpen(2, 2));
+    percolation.open(2, 4);
+    console.log("Is 2, 4 open? ", percolation.isOpen(2, 2));
     console.log("Is 3, 4 open? ", percolation.isOpen(3, 4));
     console.log("Calling open...");
-    percolation.open(3, 4);
-    console.log("Is 3, 4 open? ", percolation.isOpen(3, 4));
-    console.log(percolation.uf.connected(0, 5));
+    percolation.open(4, 4);
+    console.log("Is 4, 5 open? ", percolation.isOpen(3, 4));
+    percolation.open(6, 4);
+    console.log("Is 6, 4 open? ", percolation.isOpen(3, 4));
+    percolation.open(8, 4);
+    console.log("Is 8, 4 open? ", percolation.isOpen(3, 4));
+    percolation.open(9, 4);
+    console.log("Is 9, 4 open? ", percolation.isOpen(3, 4));
+    percolation.open(10, 4);
+    console.log("percolates?", percolation.percolates())
 
-    console.log(percolation.uf.components);
+
+    console.log("matrix: ");
+    const matrix = percolation.uf.components.reduce((acc, curr, idx) => {
+      const idxString = `${curr}`.padStart(3, " ")
+      if(idx === 0) {
+        return `${idxString}\n`
+      }
+
+      if((idx) % Number(size) === 0) {
+        return `${acc} ${idxString}\n`
+      }
+
+      return `${acc} ${idxString}`
+    }, "")
+    console.log(matrix)
+
   }
 }
