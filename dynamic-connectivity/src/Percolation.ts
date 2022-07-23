@@ -3,6 +3,7 @@
 import { IllegalArgumentException } from "./Exceptions";
 import UF from "./UF";
 
+
 abstract class AbstractPercolation {
   // CONSTRUCTOR :: creates n-by-n grid, with all sites initially blocked
 
@@ -25,10 +26,13 @@ abstract class AbstractPercolation {
   // public abstract main(args: String[]): void;
 }
 
+
+
 export class Percolation implements AbstractPercolation {
   uf: UF;
   n: number;
-  private openSites = 0;
+  openSites = 0;
+  isOpenMap = new Map<`${number}-${number}`, boolean>()
 
   constructor(n: number) {
     this.n = n;
@@ -58,7 +62,7 @@ export class Percolation implements AbstractPercolation {
   private withinRange(...numbers: number[]) {
     return numbers
       .map((n) => n > 0 && n <= this.uf.N - 2)
-      .every((n) => n === true);
+      .every((n) => n);
   }
 
   public open(row: number, col: number): void {
@@ -70,10 +74,9 @@ export class Percolation implements AbstractPercolation {
 
     const [center, ...neighbors] = this.getNeighbors(row, col);
 
-    console.log("open", center);
-
     neighbors.forEach((neighbor) => this.uf.union(center, neighbor));
     this.openSites++;
+    this.isOpenMap.set(`${row}-${col}`, true);
   }
 
   public isOpen(row: number, col: number): boolean {
@@ -83,13 +86,7 @@ export class Percolation implements AbstractPercolation {
       );
     }
 
-    const [center, ...neighbors] = this.getNeighbors(row, col);
-    console.log(center);
-    const isOpenned = neighbors.every((neighbor) =>
-      this.uf.connected(center, neighbor)
-    );
-
-    return isOpenned;
+    return !!this.isOpenMap.get(`${row}-${col}`);
   }
 
   public isFull(row: number, col: number): boolean {
@@ -124,7 +121,7 @@ export class Percolation implements AbstractPercolation {
       (_, k) => k + 1
     )
       .map((val) => percolation.uf.connected(0, val))
-      .every((val) => val === true);
+      .every((val) => val);
 
     console.log("Has top connected? ", hasTopConnected);
 
@@ -133,7 +130,7 @@ export class Percolation implements AbstractPercolation {
       (_, k) => percolation.n ** 2 - k
     )
       .map((val) => percolation.uf.connected(percolation.uf.N - 1, val))
-      .every((val) => val === true);
+      .every((val) => val);
 
     console.log("Has Bottom connected? ", hasBottomConnected);
 
@@ -142,7 +139,7 @@ export class Percolation implements AbstractPercolation {
       [percolation.uf.N - 1, percolation.n ** 2 - percolation.n],
     ]
       .map(([first, second]) => percolation.uf.connected(first, second))
-      .every((val) => val === false);
+      .every((val) => !val);
 
     console.log(
       "Are Second And Before Last Row Disconnected? ",
