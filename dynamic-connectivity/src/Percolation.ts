@@ -45,7 +45,8 @@ export class Percolation implements AbstractPercolation {
   }
 
   private getIndex(row: number, col: number) {
-    if (row <= 0 || col <= 0) return undefined;
+    if (row <= 0 || row > this.n) return;
+    if (col <= 0 || col > this.n) return;
     return this.n * (row - 1) + col;
   }
 
