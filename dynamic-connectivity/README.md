@@ -1,7 +1,7 @@
 # Percolation Threshold of a system
 
 
-This application uses Monte Carlo Simulation to calculate the percolation threshold of a system based on the proportion of open sites. The system is always a square matrix.
+This application uses Monte Carlo Simulation to calculate the percolation threshold of a system based on the proportion of open sites. On this simmulation the system is always a square matrix.
 
 
 ## Classes
