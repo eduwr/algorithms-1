@@ -4,7 +4,6 @@ import { IllegalArgumentException } from "./Exceptions";
 import UF from "./UF";
 import { isBiggerThanZero } from "./utils";
 
-
 abstract class AbstractPercolation {
   // CONSTRUCTOR :: creates n-by-n grid, with all sites initially blocked
 
@@ -27,13 +26,9 @@ abstract class AbstractPercolation {
   // public abstract main(args: String[]): void;
 }
 
-
-
 export class Percolation implements AbstractPercolation {
   uf: UF;
   n: number;
-  openSites = 0;
-  isOpenMap = new Map<`${number}-${number}`, boolean>()
 
   constructor(n: number) {
     this.n = n;
@@ -60,10 +55,22 @@ export class Percolation implements AbstractPercolation {
     return [middle, top, right, bottom, left].filter(Boolean) as number[];
   }
 
+  private getRow = (idx: number): number => {
+    for (let count = 1; count <= this.n; count++) {
+      if (idx >= this.n * (count - 1) && idx <= this.n * count) {
+        return count;
+      }
+    }
+
+    throw new IllegalArgumentException("Index out of range");
+  };
+
+  private getColumn = (idx: number): number => {
+    return idx - this.n * (this.getRow(idx) - 1);
+  };
+
   private withinRange(...numbers: number[]) {
-    return numbers
-      .map((n) => n > 0 && n <= this.uf.N - 2)
-      .every((n) => n);
+    return numbers.map((n) => n > 0 && n <= this.uf.N - 2).every((n) => n);
   }
 
   public open(row: number, col: number): void {
@@ -76,8 +83,6 @@ export class Percolation implements AbstractPercolation {
     const [center, ...neighbors] = this.getNeighbors(row, col);
 
     neighbors.forEach((neighbor) => this.uf.union(center, neighbor));
-    this.openSites++;
-    this.isOpenMap.set(`${row}-${col}`, true);
   }
 
   public isOpen(row: number, col: number): boolean {
@@ -87,7 +92,9 @@ export class Percolation implements AbstractPercolation {
       );
     }
 
-    return !!this.isOpenMap.get(`${row}-${col}`);
+    const [center, ...neighbors] = this.getNeighbors(row, col);
+
+    return neighbors.some((neighbor) => this.uf.connected(center, neighbor));
   }
 
   public isFull(row: number, col: number): boolean {
@@ -97,17 +104,19 @@ export class Percolation implements AbstractPercolation {
       );
     }
 
-    const index = this.getIndex(row, col);
+    const [center, ...neighbors] = this.getNeighbors(row, col);
 
-    if (!index) {
-      return false;
-    }
-
-    return this.uf.connected(0, index);
+    return neighbors.every((neighbor) => this.uf.connected(center, neighbor));
   }
 
   public numberOfOpenSites(): number {
-    return this.openSites;
+    let openSites = 0;
+    for (let i = 1; i <= this.n ** 2; i++) {
+      if (this.isFull(this.getRow(i), this.getColumn(i))) {
+        openSites++;
+      }
+    }
+    return openSites;
   }
 
   public percolates(): boolean {
@@ -175,23 +184,22 @@ export class Percolation implements AbstractPercolation {
     percolation.open(9, 4);
     console.log("Is 9, 4 open? ", percolation.isOpen(3, 4));
     percolation.open(10, 4);
-    console.log("percolates?", percolation.percolates())
-
+    console.log("percolates?", percolation.percolates());
 
     console.log("matrix: ");
     const matrix = percolation.uf.components.reduce((acc, curr, idx) => {
-      const idxString = `${curr}`.padStart(3, " ")
-      if(idx === 0) {
-        return `${idxString}\n`
+      const idxString = `${curr}`.padStart(3, " ");
+      if (idx === 0) {
+        return `${idxString}\n`;
       }
 
-      if((idx) % Number(size) === 0) {
-        return `${acc} ${idxString}\n`
+      if (idx % Number(size) === 0) {
+        return `${acc} ${idxString}\n`;
       }
 
-      return `${acc} ${idxString}`
-    }, "")
-    console.log(matrix)
-
+      return `${acc} ${idxString}`;
+    }, "");
+    console.log(matrix);
+    console.log("Open sites", percolation.numberOfOpenSites());
   }
 }

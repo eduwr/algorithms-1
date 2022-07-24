@@ -28,7 +28,7 @@ export class PercolationStats implements AbstractPercolationStats {
   private readonly n;
   private readonly trials;
   private readonly totalSites;
-  private percolationThresholds: number[] = []
+  private percolationThresholds: number[] = [];
   private _mean = 0;
   private _stddev = 0;
 
@@ -56,59 +56,62 @@ export class PercolationStats implements AbstractPercolationStats {
   }
 
   private findPercolationThreshold() {
-    this.resetPercolation()
+    this.resetPercolation();
     while (!this.percolation.percolates()) {
       const row = this.getRandomPoint();
       const col = this.getRandomPoint();
 
-
-      this.percolation.open(row, col)
+      this.percolation.open(row, col);
     }
 
-    return this.percolation.openSites / this.totalSites;
+    return this.percolation.numberOfOpenSites() / this.totalSites;
   }
 
   private repeatUntilReachNbrOfTrials() {
-    let currentTrials = 0
+    let currentTrials = 0;
 
     while (currentTrials !== this.trials) {
-      console.log(`Trial ${currentTrials}/${this.trials}`)
-      const percolationThreshold = this.findPercolationThreshold()
-      this.percolationThresholds.push(percolationThreshold)
-      currentTrials++
+      console.log(`Trial ${currentTrials}/${this.trials}`);
+      const percolationThreshold = this.findPercolationThreshold();
+      this.percolationThresholds.push(percolationThreshold);
+      currentTrials++;
     }
   }
 
   public mean(): number {
-    if(this._mean) {
-      return this._mean
+    if (this._mean) {
+      return this._mean;
     }
 
     this._mean = this.percolationThresholds.reduce((acc, curr) => {
-      return acc + (curr/this.trials)
+      return acc + curr / this.trials;
     }, 0);
 
-    return this._mean
+    return this._mean;
   }
 
   public stddev(): number {
-    if(this._stddev){
-      return this._stddev
+    if (this._stddev) {
+      return this._stddev;
     }
-    const mean = this.mean()
+    const mean = this.mean();
     this._stddev = this.percolationThresholds.reduce((acc, curr) => {
-      return acc + ((curr - mean) ** 2) / (this.trials - 1)
-    }, 0)
+      return acc + (curr - mean) ** 2 / (this.trials - 1);
+    }, 0);
 
-    return this._stddev
+    return this._stddev;
   }
 
   public confidenceLo(): number {
-    return this.mean() - (1.96*(Math.sqrt(this.stddev())) / Math.sqrt(this.trials))
+    return (
+      this.mean() - (1.96 * Math.sqrt(this.stddev())) / Math.sqrt(this.trials)
+    );
   }
 
   public confidenceHi(): number {
-    return this.mean() + (1.96*(Math.sqrt(this.stddev())) / Math.sqrt(this.trials))
+    return (
+      this.mean() + (1.96 * Math.sqrt(this.stddev())) / Math.sqrt(this.trials)
+    );
   }
 
   public static main(): void {
@@ -131,8 +134,8 @@ export class PercolationStats implements AbstractPercolationStats {
       mean,
       stddev,
       confidenceLow,
-      confidenceHi
-    }
+      confidenceHi,
+    };
     console.table(results);
   }
 }
